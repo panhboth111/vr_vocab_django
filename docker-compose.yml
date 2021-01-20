@@ -1,0 +1,13 @@
+version: '3.7'
+
+services: 
+  api:
+    build: 
+      context: .
+    ports: 
+      - "8000:8000"
+    volumes: 
+      - ./api:/api
+    command: sh -c "python manage.py runserver 192.168.7.94:8000"
+    environment: 
+      - DEBUG=1
