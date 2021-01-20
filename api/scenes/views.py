@@ -29,7 +29,7 @@ class SceneViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(data=serializer.data)
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path="SceneNoPosRot")
     def query_scene_without_posrot(self,request):
         words = Word.objects.all()
         scenes = [word.scene for word in words if word.position == "" or word.rotation == ""]
