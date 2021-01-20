@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.db.models import Q
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -27,9 +29,12 @@ class SceneViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(data=serializer.data)
-
-
-
+    @action(detail=False, methods=['get'])
+    def query_scene_without_posrot(self,request):
+        words = Word.objects.all()
+        scenes = [word.scene for word in words if word.position == "" or word.rotation == ""]
+        serializer = self.get_serializer(scenes,many=True)
+        return Response(serializer.data)
 
 class WordViewSet(viewsets.ModelViewSet):
     """
@@ -43,16 +48,27 @@ class WordViewSet(viewsets.ModelViewSet):
             return Word.objects.filter(scene=self.kwargs['scene_id'])
         else:
             return Word.objects.all()
-    queryset = Word.objects.all()   
+    queryset = Word.objects.all()
     serializer_class = WordSerializer
-    http_method_names = ['get']
+    http_method_names = ['get','post']
     lookup_field = "scene_id"
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(data=serializer.data)
-    
-
-
+    @action(detail=False, methods=['get'],url_path="empty_posrot_words")
+    def query_word_without_posrot(self,request):
+        words = Word.objects.all().filter(Q(position = "") |Q(rotation = ""))
+        serializer = WordSerializer(words, many = True)
+        return Response(data=serializer.data)
+    @action(detail=False, methods=['post'],url_path="posrot")
+    def add_position_rotation(self,request):
+        word = Word.objects.get(word=request.data["word"])
+        word.position = request.data["position"]
+        word.rotation = request.data["rotation"]
+        word.save()
+        serializer = WordSerializer(word)
+        return Response(serializer.data)
+        
 class BookmarkViewSet(viewsets.ModelViewSet):
     """
         list:
@@ -102,9 +118,3 @@ class UnderstoodViewSet(viewsets.ModelViewSet):
         understood.save()
         serializer = UnderstoodSerializer(understood)
         return Response(serializer.data)
-
-<<<<<<< HEAD
-=======
-    
->>>>>>> 0b676230f4d4429ca82551d43cd3590c991cafda
-

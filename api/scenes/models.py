@@ -16,6 +16,8 @@ class Word (models.Model):
     synonym = models.CharField( max_length=20 )
     definition = models.TextField()
     example = models.TextField()
+    position = models.CharField( max_length=255,default="" )
+    rotation = models.CharField( max_length=255,default="")
     scene = models.ForeignKey(Scene, related_name='words',on_delete=models.CASCADE)
 
 class Bookmark(models.Model):
