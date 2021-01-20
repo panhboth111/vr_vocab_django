@@ -31,6 +31,9 @@ class SceneViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data)
     @action(detail=False, methods=['get'])
     def query_scene_without_posrot(self,request):
+        """
+            get the scenes that contain words with position or rotation
+        """
         words = Word.objects.all()
         scenes = [word.scene for word in words if word.position == "" or word.rotation == ""]
         serializer = self.get_serializer(scenes,many=True)
@@ -55,13 +58,19 @@ class WordViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(data=serializer.data)
-    @action(detail=False, methods=['get'],url_path="empty_posrot_words")
-    def query_word_without_posrot(self,request):
-        words = Word.objects.all().filter(Q(position = "") |Q(rotation = ""))
+    @action(detail=False, methods=['get'],url_path='empty/(?P<scene_id>[^/.]+)')
+    def query_word_without_posrot(self,request,scene_id,pk=None):
+        """
+            get words that dont have position or rotation in a specific scene
+        """
+        words = Word.objects.all().filter(scene=scene_id).filter(Q(position = "") |Q(rotation = ""))
         serializer = WordSerializer(words, many = True)
         return Response(data=serializer.data)
     @action(detail=False, methods=['post'],url_path="posrot")
     def add_position_rotation(self,request):
+        """ 
+            add position and rotation to a word
+        """
         word = Word.objects.get(word=request.data["word"])
         word.position = request.data["position"]
         word.rotation = request.data["rotation"]
@@ -95,18 +104,31 @@ class BookmarkViewSet(viewsets.ModelViewSet):
         serializer = BookmarkSerializer(bookmark)
         return Response(serializer.data)
 class RecommendationViewSet(viewsets.ModelViewSet):
+    """
+        list:
+        (token) list down the recommended scenes for a user
+    """
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
     permission_classes = [IsAuthenticated]
+    http_method_names = ['get']
     def list(self, request):
         user = request.user
         recommendation = Scene.objects.all().filter(level=user.level)
         serializer = SceneSerializer(recommendation, many=True)
         return Response(serializer.data)
 class UnderstoodViewSet(viewsets.ModelViewSet):
+    """
+        list:
+        (token) get all the understood words of a specific user
+        retrieve:
+        create:
+        (token) add an understood word for a user
+    """
     queryset = Understood.objects.all()
     serializer_class = UnderstoodSerializer
     permission_classes = [IsAuthenticated]
+    http_method_names = ['get','post']
     def list(self, request):
         user = request.user
         understood = Understood.objects.all().filter(user=user.id)

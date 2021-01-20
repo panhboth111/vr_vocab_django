@@ -25,4 +25,8 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         serializer = self.get_serializer(user)
         return Response(serializer.data)
+    def list(self,request):
+        return Response("you are not authorized to access this route")
+    def retrieve(self,request, pk=None):
+        return Response("you are not authorized to access this route")
 
