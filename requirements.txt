@@ -27,3 +27,4 @@ sqlparse==0.4.1
 uritemplate==3.0.1
 urllib3==1.26.2
 whitenoise==5.0.1
+uWSGI>=2.0.18,<2.1
