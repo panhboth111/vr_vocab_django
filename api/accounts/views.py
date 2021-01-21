@@ -33,7 +33,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def change_password(self, request):
         user = request.user
         serializer = ChangePasswordSerializer(data=request.data)
-        print("here")
         if serializer.is_valid():
             if not user.check_password(serializer.data.get("old_password")):
                 return Response({"old_password": ["Incorrect password."]})
@@ -41,3 +40,9 @@ class UserViewSet(viewsets.ModelViewSet):
             user.save()
             return Response("Password changed successfully")
         return Response(serializer.errors)
+    # @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
+    # def forgot_password(self, request):
+    #     user = request.user
+    #     serializer = ForgotPasswordSerializer(data=request.data)
+    #     if serializer.is_valid():
+            

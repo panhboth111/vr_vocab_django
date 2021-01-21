@@ -19,7 +19,7 @@ class SceneViewSet(viewsets.ModelViewSet):
     """
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
-    http_method_names = ['get']
+    http_method_names = ['get','post']
     lookup_field = "level"
     def get_queryset(self):
         if 'level' in self.kwargs:
