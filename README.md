@@ -16,13 +16,13 @@ pip install virtualenv
 Build virtual environment for the local directory
 ```bash
 python -m venv "venv_name"
+```
 Activate virtual environment
 ### Ubuntu
 ```bash
 source venv_name/bins/activate
 ```
 ### Window
-Scripts
 ```bash
 venv_name\Scripts\activate
 ```
