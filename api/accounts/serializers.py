@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
@@ -21,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if not attrs['is_active']:
-            raise serializers.ValidationError({"active": "Account's email needs to be confirmed"}) 
+            raise serializers.ValidationError({"active": "Account's email needs to be confirmed"})
         return attrs
     def create(self, validated_data):
         user = User.objects.create(
@@ -32,3 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+# class ForgotPasswordSerializer(serializers.Serializer):
+#     model = User
+#     new_password = serializers.CharField(required=True)

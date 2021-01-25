@@ -11,12 +11,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = '6a0h76$tgz6a8*yss+hz3e^kxwai^+olx%x8af!66nn$uh7-k='
-
-# # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-
 # ALLOWED_HOSTS = []
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -25,6 +19,9 @@ DEBUG = int(os.environ.get("DEBUG", default=0))
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+    
 
 # Application definition
 
@@ -132,9 +129,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+<<<<<<< HEAD
 
 STATIC_URL = "/staticfiles/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+=======
+STATIC_URL = '/static/static/'
+MEDIA_URL = '/static/media/'
+
+STATIC_ROOT = 'vol/web/static/'
+MEDIA_ROOT = '/vol/web/media/'
+
+
+>>>>>>> master
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 REST_FRAMEWORK = {

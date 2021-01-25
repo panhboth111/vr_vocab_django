@@ -19,7 +19,7 @@ class SceneViewSet(viewsets.ModelViewSet):
     """
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
-    http_method_names = ['get']
+    http_method_names = ['get','post']
     lookup_field = "level"
     def get_queryset(self):
         if 'level' in self.kwargs:
@@ -29,7 +29,7 @@ class SceneViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(data=serializer.data)
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path="SceneNoPosRot")
     def query_scene_without_posrot(self,request):
         """
             get the scenes that contain words with position or rotation
