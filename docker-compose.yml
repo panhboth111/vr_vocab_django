@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=lor
+      - POSTGRES_USER=l_o_r
       - POSTGRES_PASSWORD=lor11022020!
       - POSTGRES_DB=vr_vocabulary
 
