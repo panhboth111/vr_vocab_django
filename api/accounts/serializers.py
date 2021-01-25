@@ -36,6 +36,12 @@ class ChangePasswordSerializer(serializers.Serializer):
     model = User
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+class UpdateUserScoreSerializer(serializers.Serializer):
+    model = User
+    score = serializers.IntegerField(required=True)
+class UpdateUserLevelSerializer(serializers.Serializer):
+    model = User
+    level = serializers.IntegerField(required=True)
 # class ForgotPasswordSerializer(serializers.Serializer):
 #     model = User
 #     new_password = serializers.CharField(required=True)

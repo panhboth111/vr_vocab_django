@@ -10,6 +10,7 @@ class WordSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Word
+        extra_kwargs = {'synonym': {'required': False}, 'position': {'required': False},'rotation': {'required': False}} 
         lookup_field = "scene"
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,3 +20,8 @@ class UnderstoodSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Bookmark
+class PosRotSerializer(serializers.Serializer):
+    model = Word
+    word = serializers.CharField(required=True)
+    position = serializers.CharField(required=True)
+    rotation = serializers.CharField(required=True)

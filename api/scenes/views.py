@@ -7,7 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer
+from .mixins import GetSerializerClassMixin
 # Create your views here.
 
 class SceneViewSet(viewsets.ModelViewSet):
@@ -35,11 +36,11 @@ class SceneViewSet(viewsets.ModelViewSet):
             get the scenes that contain words with position or rotation
         """
         words = Word.objects.all()
-        scenes = [word.scene for word in words if word.position == "" or word.rotation == ""]
+        scenes = set([word.scene for word in words if word.position == "" or word.rotation == ""])
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
-class WordViewSet(viewsets.ModelViewSet):
+class WordViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
     list:
     get all words
@@ -54,6 +55,9 @@ class WordViewSet(viewsets.ModelViewSet):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
     http_method_names = ['get','post']
+    serializer_action_classes = {
+        'add_position_rotation':PosRotSerializer
+    }
     lookup_field = "scene_id"
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
@@ -63,7 +67,7 @@ class WordViewSet(viewsets.ModelViewSet):
         """
             get words that dont have position or rotation in a specific scene
         """
-        words = Word.objects.all().filter(scene=scene_id).filter(Q(position = "") |Q(rotation = ""))
+        words = Word.objects.all().filter(scene=scene_id).filter(Q(position = "non") |Q(rotation = "non"))
         serializer = WordSerializer(words, many = True)
         return Response(data=serializer.data)
     @action(detail=False, methods=['post'],url_path="posrot")
