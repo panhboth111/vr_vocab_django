@@ -24,14 +24,15 @@ class Bookmark(models.Model):
     word = models.CharField( max_length=200 )
     definition = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-class Percentage(models.Model):
-    scene_name = models.CharField( max_length=200 )
-    percentage = models.IntegerField()
-    total_vocab = models.IntegerField()
-    complete = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
 class Understood(models.Model):
     word = models.CharField( max_length=200 )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Percentage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    scene_name = models.CharField( max_length=200, null=True)
+    percentage = models.CharField( max_length=200, null=True)
+    total_vocab = models.CharField( max_length=200,null=True)
+    complete = models.CharField( max_length=200,null=True)
 
 

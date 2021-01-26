@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Scene,Word,Bookmark, Understood
+from .models import Scene,Word,Bookmark, Understood, Percentage
 class SceneSerializer(serializers.ModelSerializer):
     words = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
@@ -25,3 +25,17 @@ class PosRotSerializer(serializers.Serializer):
     word = serializers.CharField(required=True)
     position = serializers.CharField(required=True)
     rotation = serializers.CharField(required=True)
+
+
+class PercentageSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ["scene_name","percentage","total_vocab","complete"]
+        model = Percentage
+
+class PercentageUpdatePercentageSerializer(serializers.Serializer):
+    scene_name = serializers.CharField(required=True)
+    percentage = serializers.CharField(required=True)
+
+class PercentageUpdateCompleteSerializer(serializers.Serializer):
+    scene_name = serializers.CharField(required=True)
+    complete = serializers.CharField(required=True)

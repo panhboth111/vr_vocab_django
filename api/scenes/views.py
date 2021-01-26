@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Scene,Word,Bookmark,Understood
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer
+from .models import Scene,Word,Bookmark,Understood, Percentage
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer
 from .mixins import GetSerializerClassMixin
 # Create your views here.
 
@@ -144,3 +144,46 @@ class UnderstoodViewSet(viewsets.ModelViewSet):
         understood.save()
         serializer = UnderstoodSerializer(understood)
         return Response(serializer.data)
+class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
+    """
+    create:
+    (token)create percentage for a user
+    list:
+    (token)get all percentage in all scenes for a user
+    update_percentage:
+    (token)update percentage in a specific scene for a user
+    update_complete:
+    (token)update complete in a specific scene for a user
+    """
+    queryset = Percentage.objects.all()
+    serializer_class = PercentageSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get','post']
+    serializer_action_classes = {
+        'update_percentage':PercentageUpdatePercentageSerializer,
+        'update_complete':PercentageUpdateCompleteSerializer
+    }
+    def create(self,request):
+        user = request.user
+        new_percentage = Percentage(scene_name=request.data["scene_name"],user=user,percentage=request.data["percentage"], total_vocab=request.data["total_vocab"], complete=request.data["complete"])
+        new_percentage.save()
+        serializer = self.get_serializer(new_percentage)
+        return Response(serializer.data)
+    def list(self,request):
+        user = request.user
+        percentage = Percentage.objects.all().filter(user=user.id)
+        serializer = self.get_serializer(percentage, many= True)
+        return Response(serializer.data)
+    @action(detail=False, methods=['post'])
+    def update_percentage(self,request):
+        user = request.user
+        percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
+        percentage.percentage = request.data["percentage"]
+        return Response("percentage updated successfully")
+    @action(detail=False, methods=['post'])
+    def update_complete(self,request):
+        user = request.user
+        percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
+        percentage.complete = request.data["complete"]
+        return Response("complete updated successfully")
+    
