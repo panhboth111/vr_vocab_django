@@ -19,7 +19,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
 class UnderstoodSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Bookmark
+        model = Understood
 class PosRotSerializer(serializers.Serializer):
     model = Word
     word = serializers.CharField(required=True)
