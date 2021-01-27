@@ -17,7 +17,7 @@ router.register('understoods', UnderstoodViewSet)
 router.register('percentage',PercentageViewSet)
 
 
-schema_view = get_swagger_view(title="VR Vocabulary API Documentation")
+schema_view = get_swagger_view(title="VR Vocabulary API Documentation"  )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
