@@ -56,8 +56,8 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     def update_score(self,request):
         serializer = UpdateUserScoreSerializer
         user = request.user
-        queried_user = User.objects.all(email=user.email)
-        queried_user.score = queried_user.score + request.data["additional_score"]
+        queried_user = User.objects.get(email=user.email)
+        queried_user.score = queried_user.score + request.data["score"]
         queried_user.save()
         return Response("user score updated successfully")
     @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
