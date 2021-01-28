@@ -36,7 +36,7 @@ class SceneViewSet(viewsets.ModelViewSet):
             get the scenes that contain words with position or rotation
         """
         words = Word.objects.all()
-        scenes = set([word.scene for word in words if word.position == "" or word.rotation == ""])
+        scenes = set([word.scene for word in words if word.position == "non" or word.rotation == "non"])
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
