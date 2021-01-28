@@ -165,6 +165,9 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     }
     def create(self,request):
         user = request.user
+        queried_percentage = Percentage.objects.all().filter(user=user.id,scene_name=request.data["scene_name"])
+        if len(queried_percentage) > 0:
+            return Response("The percentage for this user in this scene has already been created")
         new_percentage = Percentage(scene_name=request.data["scene_name"],user=user,percentage=request.data["percentage"], total_vocab=request.data["total_vocab"], complete=request.data["complete"])
         new_percentage.save()
         serializer = self.get_serializer(new_percentage)
