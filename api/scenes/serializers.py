@@ -22,7 +22,7 @@ class UnderstoodSerializer(serializers.ModelSerializer):
         model = Understood
 class PosRotSerializer(serializers.Serializer):
     model = Word
-    word = serializers.CharField(required=True)
+    id = serializers.IntegerField(required=True)
     position = serializers.CharField(required=True)
     rotation = serializers.CharField(required=True)
 
