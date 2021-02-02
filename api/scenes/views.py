@@ -75,13 +75,12 @@ class WordViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         """ 
             add position and rotation to a word
         """
-        word = Word.objects.get(word=request.data["word"])
+        word = Word.objects.get(id=request.data["id"])
         word.position = request.data["position"]
         word.rotation = request.data["rotation"]
         word.save()
         serializer = WordSerializer(word)
         return Response(serializer.data)
-        
 class BookmarkViewSet(viewsets.ModelViewSet):
     """
         list:
