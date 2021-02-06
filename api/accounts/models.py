@@ -8,6 +8,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField('username', max_length=100)
     level = models.IntegerField(default=1)
     score = models.IntegerField(default=0)
+    coin = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Scene,Word,Bookmark, Understood, Percentage
+from .models import Scene,Word,Bookmark, Understood, Percentage, PointToApprove
 class SceneSerializer(serializers.ModelSerializer):
     words = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
@@ -39,3 +39,12 @@ class PercentageUpdatePercentageSerializer(serializers.Serializer):
 class PercentageUpdateCompleteSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
     complete = serializers.CharField(required=True)
+
+# class PointToApproveSerializer(serializers.Serializer):
+#     target_point = serializers.IntegerField(required=True)
+class PointToApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = PointToApprove
+class UpdateUserScoreSerializer(serializers.Serializer):
+    score = serializers.IntegerField(required=True)

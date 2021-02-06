@@ -17,7 +17,7 @@ class Word (models.Model):
     definition = models.TextField()
     example = models.TextField()
     position = models.CharField( max_length=255,default="" )
-    rotation = models.CharField( max_length=255,default="")
+    rotation = models.CharField( max_length=255,default="" )
     scene = models.ForeignKey(Scene, related_name='words',on_delete=models.CASCADE)
 
 class Bookmark(models.Model):
@@ -30,9 +30,13 @@ class Understood(models.Model):
 
 class Percentage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    scene_name = models.CharField( max_length=200, null=True)
-    percentage = models.CharField( max_length=200, null=True)
-    total_vocab = models.CharField( max_length=200,null=True)
-    complete = models.CharField( max_length=200,null=True)
+    scene_name = models.CharField( max_length=200, null=True )
+    percentage = models.CharField( max_length=200, null=True )
+    total_vocab = models.CharField( max_length=200, null=True )
+    complete = models.CharField( max_length=200, null=True )
+
+class PointToApprove(models.Model):
+    target_point = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
