@@ -17,3 +17,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
     def __str__(self):
         return self.email
+        
+class ForgotPassword(models.Model):
+    email = models.EmailField()
+    code = models.IntegerField()
+    confirmed = models.BooleanField(default=False)
