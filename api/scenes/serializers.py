@@ -23,6 +23,7 @@ class UnderstoodSerializer(serializers.ModelSerializer):
 class AddUnderstoodSerializer(serializers.Serializer):
     word = serializers.CharField(required=True)
     target_point = serializers.IntegerField(required=True)
+    lookup_field = "user"
 class PosRotSerializer(serializers.Serializer):
     model = Word
     id = serializers.IntegerField(required=True)
@@ -37,11 +38,11 @@ class PercentageSerializer(serializers.ModelSerializer):
 
 class PercentageUpdatePercentageSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
-    percentage = serializers.CharField(required=True)
+    percentage = serializers.IntegerField(required=True)
 
 class PercentageUpdateCompleteSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
-    complete = serializers.CharField(required=True)
+    complete = serializers.IntegerField(required=True)
 
 class PointToApproveSerializer(serializers.ModelSerializer):
     class Meta:

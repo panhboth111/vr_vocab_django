@@ -170,9 +170,14 @@ class UnderstoodViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         if serializer.is_valid():
             understood = Understood(word=serializer.data.get("word"),user=user)
             understood.save()
-            point = PointToApprove.objects.get(user = user)
-            point.target_point += serializer.data.get("target_point")
-            point.save()
+            point = PointToApprove.objects.filter(user = user)
+            if point.exists():
+                point = PointToApprove.objects.get(user = user)
+                point.target_point += serializer.data.get("target_point")
+                point.save()
+            else:
+                create_point_to_approve = PointToApprove(target_point = serializer.data.get("target_point"), user=user)
+                create_point_to_approve.save()
             serializer = UnderstoodSerializer(understood)
             return Response(serializer.data)
         return Response(serializer.errors)
@@ -214,12 +219,14 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         user = request.user
         percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
         percentage.percentage = request.data["percentage"]
+        percentage.save()
         return Response("percentage updated successfully")
     @action(detail=False, methods=['post'])
     def update_complete(self,request):
         user = request.user
         percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
         percentage.complete = request.data["complete"]
+        percentage.save()
         return Response("complete updated successfully")
 class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
