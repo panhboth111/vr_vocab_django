@@ -215,7 +215,7 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
         percentage.complete = request.data["complete"]
         return Response("complete updated successfully")
-class PointToApproveViewSet(viewsets.ModelViewSet):
+class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
     serializer_class = PointToApproveSerializer
     permission_classes = [IsAuthenticated]
