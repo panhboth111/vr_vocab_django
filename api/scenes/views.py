@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -144,7 +144,7 @@ class RecommendationViewSet(viewsets.ModelViewSet):
         recommendation = Scene.objects.all().filter(level=user.level)
         serializer = SceneSerializer(recommendation, many=True)
         return Response(serializer.data)
-class UnderstoodViewSet(viewsets.ModelViewSet):
+class UnderstoodViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
         list:
         (token) get all the understood words of a specific user
@@ -156,6 +156,9 @@ class UnderstoodViewSet(viewsets.ModelViewSet):
     serializer_class = UnderstoodSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get','post']
+    serializer_action_classes = {
+        'create':AddUnderstoodSerializer
+    }
     def list(self, request):
         user = request.user
         understood = Understood.objects.all().filter(user=user.id)

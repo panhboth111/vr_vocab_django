@@ -20,6 +20,9 @@ class UnderstoodSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Understood
+class AddUnderstoodSerializer(serializers.Serializer):
+    word = serializers.CharField(required=True)
+    target_point = serializers.CharField(required=True)
 class PosRotSerializer(serializers.Serializer):
     model = Word
     id = serializers.IntegerField(required=True)
