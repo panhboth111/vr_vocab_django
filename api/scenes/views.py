@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -217,7 +217,7 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response("complete updated successfully")
 class PointToApproveViewSet(viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
-    serializer_class = PercentageSerializer
+    serializer_class = PointToApproveSerializer
     permission_classes = [IsAuthenticated]
     def list(self, request):
         user = request.user
@@ -227,13 +227,16 @@ class PointToApproveViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def update_score(self, request):
         user = request.user
-        queried_user = User.objects.get(id=user.id)
-        queried_point = PointToApprove.objects.get(user = user.id)
-        final_score = (queried_point.target_point * request.data["percentage"])/100
-        queried_user.score += final_score
-        queried_user.save()
-        queried_user.coin += request.data['coin']
-        queried_user.save()
-        queried_point.target_point = 0
-        queried_point.save()
-        return Response("Score and Coin updated successfully")
+        serializer = UpdateUserScoreSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_user = User.objects.get(id=user.id)
+            queried_point = PointToApprove.objects.get(user = user.id)
+            final_score = (queried_point.target_point * serializer.data.get("percentage"))/100
+            queried_user.score += final_score
+            queried_user.save()
+            queried_user.coin += serializer.data.get("coin")
+            queried_user.save()
+            queried_point.target_point = 0
+            queried_point.save()
+            return Response("Score and Coin updated successfully")
+        return Response(serializer.errors)

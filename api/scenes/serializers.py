@@ -40,11 +40,11 @@ class PercentageUpdateCompleteSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
     complete = serializers.CharField(required=True)
 
-# class PointToApproveSerializer(serializers.Serializer):
-#     target_point = serializers.IntegerField(required=True)
 class PointToApproveSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = PointToApprove
+
 class UpdateUserScoreSerializer(serializers.Serializer):
-    score = serializers.IntegerField(required=True)
+    percentage = serializers.IntegerField(required=True)
+    coin = serializers.IntegerField(required=True)
