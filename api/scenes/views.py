@@ -166,13 +166,16 @@ class UnderstoodViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response(serializer.data)
     def create(self, request):
         user = request.user
-        understood = Understood(word=request.data["word"],user=user)
-        understood.save()
-        point = PointToApprove.objects.get(user = user)
-        point.target_point += request.data["target_point"]
-        point.save()
-        serializer = UnderstoodSerializer(understood)
-        return Response(serializer.data)
+        serializer = AddUnderstoodSerializer(data = request.data)
+        if serializer.is_valid():
+            understood = Understood(word=serializer.data.get("word"),user=user)
+            understood.save()
+            point = PointToApprove.objects.get(user = user)
+            point.target_point += serializer.data.get("target_point")
+            point.save()
+            serializer = UnderstoodSerializer(understood)
+            return Response(serializer.data)
+        return Response(serializer.errors)
 class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
     create:
