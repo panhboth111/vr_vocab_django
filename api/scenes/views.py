@@ -219,6 +219,9 @@ class PointToApproveViewSet(viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
     serializer_class = PointToApproveSerializer
     permission_classes = [IsAuthenticated]
+    serializer_action_classes = {
+        'update_score': UpdateUserScoreSerializer
+    }
     def list(self, request):
         user = request.user
         point = PointToApprove.objects.all()
