@@ -44,22 +44,21 @@ class SceneViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
-    def random_scene(self, request):
+    def unlock_scene(self, request):
         user = request.user
-        plan = request.data["sub_plan"]
-        if plan == "Bronze":
+        if user.sub_plan == "Bronze":
             queried_percentage = Percentage.objects.all()
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
             queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
             serializer = SceneSerializer(queried_scenes,many=True)
             return Response(serializer.data)
-        if plan == "Silver":
+        if user.sub_plan == "Silver":
             queried_percentage = Percentage.objects.all()
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
             queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
             serializer = SceneSerializer(queried_scenes,many=True)
             return Response(serializer.data)
-        if plan == "Gold":
+        if user.sub_plan == "Gold":
             queried_scenes = Scene.objects.all().filter(level = user.level)
             serializer = SceneSerializer(queried_scenes, many=True)
             return Response(serializer.data)

@@ -7,6 +7,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('email address', unique=True)
     username = models.CharField('username', max_length=100)
     level = models.IntegerField(default=1)
+    sub_plan = models.CharField(default="Bronze", max_length = 20)
     score = models.IntegerField(default=0)
     coin = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
