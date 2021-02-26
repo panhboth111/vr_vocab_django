@@ -6,11 +6,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Scene,Word,Bookmark,Understood, Percentage
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer,UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer
+from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer
 from .mixins import GetSerializerClassMixin
+from django.contrib.auth import get_user_model
+import random
 # Create your views here.
 
+User = get_user_model()
 class SceneViewSet(viewsets.ModelViewSet):
     """
     list:
@@ -39,6 +42,26 @@ class SceneViewSet(viewsets.ModelViewSet):
         scenes = set([word.scene for word in words if word.position == "non" or word.rotation == "non"])
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def unlock_scene(self, request):
+        user = request.user
+        if user.sub_plan == "Bronze":
+            queried_percentage = Percentage.objects.all()
+            queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
+            queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
+            serializer = SceneSerializer(queried_scenes,many=True)
+            return Response(serializer.data)
+        if user.sub_plan == "Silver":
+            queried_percentage = Percentage.objects.all()
+            queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
+            queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
+            serializer = SceneSerializer(queried_scenes,many=True)
+            return Response(serializer.data)
+        if user.sub_plan == "Gold":
+            queried_scenes = Scene.objects.all().filter(level = user.level)
+            serializer = SceneSerializer(queried_scenes, many=True)
+            return Response(serializer.data)
 
 class WordViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
@@ -120,7 +143,7 @@ class RecommendationViewSet(viewsets.ModelViewSet):
         recommendation = Scene.objects.all().filter(level=user.level)
         serializer = SceneSerializer(recommendation, many=True)
         return Response(serializer.data)
-class UnderstoodViewSet(viewsets.ModelViewSet):
+class UnderstoodViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
         list:
         (token) get all the understood words of a specific user
@@ -132,6 +155,9 @@ class UnderstoodViewSet(viewsets.ModelViewSet):
     serializer_class = UnderstoodSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get','post']
+    serializer_action_classes = {
+        'create':AddUnderstoodSerializer
+    }
     def list(self, request):
         user = request.user
         understood = Understood.objects.all().filter(user=user.id)
@@ -139,10 +165,21 @@ class UnderstoodViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     def create(self, request):
         user = request.user
-        understood = Understood(word=request.data["word"],user=user)
-        understood.save()
-        serializer = UnderstoodSerializer(understood)
-        return Response(serializer.data)
+        serializer = AddUnderstoodSerializer(data = request.data)
+        if serializer.is_valid():
+            understood = Understood(word=serializer.data.get("word"),user=user)
+            understood.save()
+            point = PointToApprove.objects.filter(user = user)
+            if point.exists():
+                point = PointToApprove.objects.get(user = user)
+                point.target_point += serializer.data.get("target_point")
+                point.save()
+            else:
+                create_point_to_approve = PointToApprove(target_point = serializer.data.get("target_point"), user=user)
+                create_point_to_approve.save()
+            serializer = UnderstoodSerializer(understood)
+            return Response(serializer.data)
+        return Response(serializer.errors)
 class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
     create:
@@ -174,18 +211,48 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     def list(self,request):
         user = request.user
         percentage = Percentage.objects.all().filter(user=user.id)
-        serializer = self.get_serializer(percentage, many= True)
+        serializer = self.get_serializer(percentage, many=True)
         return Response(serializer.data)
     @action(detail=False, methods=['post'])
     def update_percentage(self,request):
         user = request.user
         percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
         percentage.percentage = request.data["percentage"]
+        percentage.save()
         return Response("percentage updated successfully")
     @action(detail=False, methods=['post'])
     def update_complete(self,request):
         user = request.user
         percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
         percentage.complete = request.data["complete"]
+        percentage.save()
         return Response("complete updated successfully")
-    
+
+class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
+    queryset = PointToApprove.objects.all()
+    serializer_class = PointToApproveSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_action_classes = {
+        'update_score': UpdateUserScoreSerializer
+    }
+    def list(self, request):
+        user = request.user
+        point = PointToApprove.objects.all()
+        serializer = PointToApproveSerializer(point, many = True)
+        return Response(serializer.data)
+    @action(detail=False, methods=['post'])
+    def update_score(self, request):
+        user = request.user
+        serializer = UpdateUserScoreSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_user = User.objects.get(id=user.id)
+            queried_point = PointToApprove.objects.get(user = user.id)
+            final_score = (queried_point.target_point * serializer.data.get("percentage"))/100
+            queried_user.score += final_score
+            queried_user.save()
+            queried_user.coin += serializer.data.get("coin")
+            queried_user.save()
+            queried_point.target_point = 0
+            queried_point.save()
+            return Response("Score and Coin updated successfully")
+        return Response(serializer.errors)

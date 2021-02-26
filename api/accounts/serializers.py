@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
-
+from .models import ForgotPassword
 
 User = get_user_model()
 
@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
-        )      
+        )
         user.set_password(validated_data['password'])
         user.save()
 
@@ -36,12 +36,30 @@ class ChangePasswordSerializer(serializers.Serializer):
     model = User
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+class SendEmailSerializer(serializers.Serializer):
+    model = User
+    email = serializers.CharField(required=True)
+
+class TemporaryForgotPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = ForgotPassword
+
+class ConfirmedCodeSerializer(serializers.Serializer):
+    model = ForgotPassword
+    code = serializers.IntegerField(required=True)
+    id = serializers.IntegerField(required=True)
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    model = User
+    id = serializers.IntegerField(required=True)
+    new_password = serializers.CharField(required=True)
+
 class UpdateUserScoreSerializer(serializers.Serializer):
     model = User
     score = serializers.IntegerField(required=True)
+
 class UpdateUserLevelSerializer(serializers.Serializer):
     model = User
     level = serializers.IntegerField(required=True)
-# class ForgotPasswordSerializer(serializers.Serializer):
-#     model = User
-#     new_password = serializers.CharField(required=True)

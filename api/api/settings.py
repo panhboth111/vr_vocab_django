@@ -9,9 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 #for production
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY").split(" ")
 DEBUG = int(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS")
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
@@ -22,7 +22,8 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
-#for dev
+
+# for dev
 # SECRET_KEY = "safsdfsdfadfad"
 # DEBUG = True
 # ALLOWED_HOSTS = []
@@ -120,6 +121,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Send Email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'lenofreality@kit.edu.kh'
+EMAIL_HOST_PASSWORD = '******'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

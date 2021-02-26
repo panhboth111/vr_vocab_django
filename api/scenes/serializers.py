@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Scene,Word,Bookmark, Understood, Percentage
+from .models import Scene,Word,Bookmark, Understood, Percentage, PointToApprove
 class SceneSerializer(serializers.ModelSerializer):
     words = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
@@ -20,6 +20,10 @@ class UnderstoodSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Understood
+class AddUnderstoodSerializer(serializers.Serializer):
+    word = serializers.CharField(required=True)
+    target_point = serializers.IntegerField(required=True)
+    lookup_field = "user"
 class PosRotSerializer(serializers.Serializer):
     model = Word
     id = serializers.IntegerField(required=True)
@@ -34,8 +38,17 @@ class PercentageSerializer(serializers.ModelSerializer):
 
 class PercentageUpdatePercentageSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
-    percentage = serializers.CharField(required=True)
+    percentage = serializers.IntegerField(required=True)
 
 class PercentageUpdateCompleteSerializer(serializers.Serializer):
     scene_name = serializers.CharField(required=True)
-    complete = serializers.CharField(required=True)
+    complete = serializers.IntegerField(required=True)
+
+class PointToApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = PointToApprove
+
+class UpdateUserScoreSerializer(serializers.Serializer):
+    percentage = serializers.IntegerField(required=True)
+    coin = serializers.IntegerField(required=True)
