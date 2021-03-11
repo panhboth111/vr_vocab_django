@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, action
-from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer
+from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer ,TopScoreSerializer
 from .models import ForgotPassword, CustomUser
 from rest_framework.generics import UpdateAPIView
 from .mixins import GetSerializerClassMixin
@@ -120,4 +120,9 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         queried_user.level = request.data["level"]
         queried_user.save()
         return Response("user level updated successfully")
+    @action(detail=False, methods=['get'],permission_classes=[IsAuthenticated])
+    def top_score(self,request):
+        userscore = User.objects.all().order_by('-score')[:10]
+        serializer = TopScoreSerializer(userscore,many=True)
+        return Response(serializer.data)
             

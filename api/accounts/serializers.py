@@ -3,6 +3,8 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from .models import ForgotPassword
+import datetime
+
 
 User = get_user_model()
 
@@ -63,3 +65,8 @@ class UpdateUserScoreSerializer(serializers.Serializer):
 class UpdateUserLevelSerializer(serializers.Serializer):
     model = User
     level = serializers.IntegerField(required=True)
+
+class TopScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username', 'score')
