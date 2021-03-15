@@ -25,3 +25,12 @@ class ForgotPassword(models.Model):
     email = models.EmailField()
     code = models.IntegerField()
     confirmed = models.BooleanField(default=False)
+
+class Card(models.Model):
+  card_num = models.CharField(max_length=200)
+  exp_month = models.CharField(max_length=5)
+  exp_year = models.CharField(max_length=5)
+  cvc = models.CharField(max_length=5)
+  sub_plan = models.CharField(max_length=20)
+  amount = models.CharField(default = "0", max_length=5)
+  email = models.CharField("email ads", max_length=50)
