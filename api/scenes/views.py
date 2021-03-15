@@ -60,11 +60,16 @@ class SceneViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def unlock_scene(self, request):
         user = request.user
+        userdatas = User.objects.get(id=user.id)
         if user.sub_plan == "Bronze":
             queried_percentage = Percentage.objects.all()
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
             queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
             serializer = SceneSerializer(queried_scenes,many=True)
+            if(datetime.now().date() == user.last_request.date()):
+                return Response("Already request")
+            userdatas.last_request = datetime.now().date()
+            userdatas.save()
             return Response(serializer.data)
         if user.sub_plan == "Silver":
             expire_date = user.sub_date + relativedelta(months=3)
@@ -75,6 +80,10 @@ class SceneViewSet(viewsets.ModelViewSet):
                 queried_percentage_scene_names = [s.scene_name for s in queried_percentage] 
                 queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
                 serializer = SceneSerializer(queried_scenes,many=True)
+                if(datetime.now().date() == user.last_request.date()):
+                    return Response("Already request")
+                userdatas.last_request = datetime.now().date()
+                userdatas.save()
                 return Response(serializer.data)
         if user.sub_plan == "Gold":
             queried_scenes = Scene.objects.all().filter(level = user.level)
