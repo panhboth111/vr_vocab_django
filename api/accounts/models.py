@@ -10,6 +10,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     level = models.IntegerField(default=1)
     sub_plan = models.CharField(default="Bronze", max_length = 20)
     sub_date = models.DateTimeField(null = True)
+    last_request = models.DateTimeField(null=True)
     score = models.IntegerField(default=0)
     coin = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
