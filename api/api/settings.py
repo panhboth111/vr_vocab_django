@@ -26,7 +26,7 @@ DATABASES = {
 # for dev
 # SECRET_KEY = "safsdfsdfadfad"
 # DEBUG = True
-# ALLOWED_HOSTS = ['10.1.40.142']
+# ALLOWED_HOSTS = []
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -35,7 +35,7 @@ DATABASES = {
 # }
 
 
-    
+
 
 # Application definition
 
