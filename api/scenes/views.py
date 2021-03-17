@@ -11,6 +11,8 @@ from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, Unde
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 # Create your views here.
 
 User = get_user_model()
@@ -43,21 +45,57 @@ class SceneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['post'])
+    def update_plan(self,request):
+        user = request.user
+        sub_plan = request.data['sub_plan']
+        sub_date = request.data['sub_date']
+
+        userdatas = User.objects.get(id=user.id)
+        userdatas.sub_plan = sub_plan
+        userdatas.sub_date = sub_date
+        userdatas.save()
+        return Response(userdatas.sub_date)
+
     @action(detail=False, methods=['get'])
     def unlock_scene(self, request):
         user = request.user
+        userdatas = User.objects.get(id=user.id)
         if user.sub_plan == "Bronze":
             queried_percentage = Percentage.objects.all()
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
             queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
             serializer = SceneSerializer(queried_scenes,many=True)
-            return Response(serializer.data)
+            
+            if(datetime.now().date() == user.last_request.date()):
+                return Response("Already request")
+            else:
+                userdatas.last_request = datetime.now().date()
+                userdatas.save()
+                scene_names = [data.scene_name for data in queried_scenes]
+                for scene_name in scene_names:
+                    percentage_scene = Percentage(user = user, scene_name = scene_name)
+                    percentage_scene.save()
+                return Response(serializer.data)
         if user.sub_plan == "Silver":
-            queried_percentage = Percentage.objects.all()
-            queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
-            queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
-            serializer = SceneSerializer(queried_scenes,many=True)
-            return Response(serializer.data)
+            expire_date = user.sub_date + relativedelta(months=3)
+            if(datetime.now().date() == expire_date.date()):
+                return Response("Payment expire")
+            else :
+                queried_percentage = Percentage.objects.all()
+                queried_percentage_scene_names = [s.scene_name for s in queried_percentage] 
+                queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
+                serializer = SceneSerializer(queried_scenes,many=True)
+                if(datetime.now().date() == user.last_request.date()):
+                    return Response("Already request")
+                else :
+                    userdatas.last_request = datetime.now().date()
+                    userdatas.save()
+                    scene_names = [data.scene_name for data in queried_scenes]
+                    for scene_name in scene_names:
+                        percentage_scene = Percentage(user = user, scene_name = scene_name)
+                        percentage_scene.save()
+                    return Response(serializer.data)
         if user.sub_plan == "Gold":
             queried_scenes = Scene.objects.all().filter(level = user.level)
             serializer = SceneSerializer(queried_scenes, many=True)

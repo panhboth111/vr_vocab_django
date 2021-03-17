@@ -35,7 +35,7 @@ DATABASES = {
 }
 
 
-    
+
 
 # Application definition
 
