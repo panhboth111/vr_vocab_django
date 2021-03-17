@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer
+from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -66,16 +66,21 @@ class SceneViewSet(viewsets.ModelViewSet):
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
             queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
             serializer = SceneSerializer(queried_scenes,many=True)
-            
+            scene_names = [data.scene_name for data in queried_scenes]
             if(datetime.now().date() == user.last_request.date()):
-                return Response("Already request")
+                queried_unlock_scene = Unlocked_Scene.objects.all().filter(user = user.id)
+                serializer = UnlockedSceneSerializer(queried_unlock_scene, many = True)
+                return Response(serializer.data)
             else:
                 userdatas.last_request = datetime.now().date()
                 userdatas.save()
-                scene_names = [data.scene_name for data in queried_scenes]
                 for scene_name in scene_names:
                     percentage_scene = Percentage(user = user, scene_name = scene_name)
                     percentage_scene.save()
+                    unlock_scene_data = Unlocked_Scene.objects.get(user = user.id)
+                    unlock_scene_data.scene_name = scene_name
+                    unlock_scene_data.user = user
+                    unlock_scene_data.save()
                 return Response(serializer.data)
         if user.sub_plan == "Silver":
             expire_date = user.sub_date + relativedelta(months=3)
@@ -86,15 +91,19 @@ class SceneViewSet(viewsets.ModelViewSet):
                 queried_percentage_scene_names = [s.scene_name for s in queried_percentage] 
                 queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
                 serializer = SceneSerializer(queried_scenes,many=True)
+                scene_names = [data.scene_name for data in queried_scenes]
                 if(datetime.now().date() == user.last_request.date()):
-                    return Response("Already request")
+                    queried_unlock_scene = Unlocked_Scene.objects.all().filter(user = user.id)
+                    serializer = UnlockedSceneSerializer(queried_unlock_scene, many = True)
+                    return Response(serializer.data)
                 else :
                     userdatas.last_request = datetime.now().date()
                     userdatas.save()
-                    scene_names = [data.scene_name for data in queried_scenes]
                     for scene_name in scene_names:
                         percentage_scene = Percentage(user = user, scene_name = scene_name)
                         percentage_scene.save()
+                        unlock_scene = Unlocked_Scene(user = user, scene_name = scene_name)
+                        unlock_scene.save()
                     return Response(serializer.data)
         if user.sub_plan == "Gold":
             queried_scenes = Scene.objects.all().filter(level = user.level)
