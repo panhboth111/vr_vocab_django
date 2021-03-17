@@ -79,7 +79,6 @@ class SceneViewSet(viewsets.ModelViewSet):
                     percentage_scene.save()
                     unlock_scene_data = Unlocked_Scene.objects.get(user = user.id)
                     unlock_scene_data.scene_name = scene_name
-                    unlock_scene_data.user = user
                     unlock_scene_data.save()
                 return Response(serializer.data)
         if user.sub_plan == "Silver":
