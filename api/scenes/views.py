@@ -95,10 +95,11 @@ class WordViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response(data=serializer.data)
     @action(detail=False, methods=['post'],url_path="posrot")
     def add_position_rotation(self,request):
-        """ 
+        """
             add position and rotation to a word
         """
         word = Word.objects.get(id=request.data["id"])
+
         word.position = request.data["position"]
         word.rotation = request.data["rotation"]
         word.save()

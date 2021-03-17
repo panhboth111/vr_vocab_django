@@ -84,7 +84,7 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             check = ForgotPassword.objects.all().filter(code = serializer.data.get("code"), id = serializer.data.get("id"))
             if len(check) > 0:
                 forgot_password = ForgotPassword.objects.get(id = serializer.data.get("id"))
-                forgot_password.confirmed = True
+                forgot_password.confirmed = True 
                 forgot_password.save()
                 return Response("Code confirmed")
             return Response("Invalid Code")

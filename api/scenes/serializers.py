@@ -16,7 +16,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Bookmark
-class UnderstoodSerializer(serializers.ModelSerializer):
+class UnderstoodSerializer(serializers.ModelSerializer): 
     class Meta:
         fields = "__all__"
         model = Understood
