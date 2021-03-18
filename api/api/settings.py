@@ -35,7 +35,7 @@ DATABASES = {
 # }
 
 
-    
+
 
 # Application definition
 
@@ -126,7 +126,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'lenofreality@kit.edu.kh'
-EMAIL_HOST_PASSWORD = '******'
+EMAIL_HOST_PASSWORD = '*****'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

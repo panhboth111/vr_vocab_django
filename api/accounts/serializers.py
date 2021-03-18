@@ -2,7 +2,9 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
-from .models import ForgotPassword
+from .models import ForgotPassword, Card
+import datetime
+
 
 User = get_user_model()
 
@@ -16,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField()
     class Meta:
         model = User
-        fields = ('id','username', 'password',  'email','is_active')
+        fields = ('id','username', 'password', 'email','is_active', 'sub_plan')
 
     def validate(self, attrs):
         if not attrs['is_active']:
@@ -63,3 +65,17 @@ class UpdateUserScoreSerializer(serializers.Serializer):
 class UpdateUserLevelSerializer(serializers.Serializer):
     model = User
     level = serializers.IntegerField(required=True)
+
+class TopScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username', 'score')
+
+class CardSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Card
+		fields = '__all__'
+
+class UpdateUserPlanSerializer(serializers.Serializer):
+    model = User
+    sub_plan = serializers.CharField(required=True)

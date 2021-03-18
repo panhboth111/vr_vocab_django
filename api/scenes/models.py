@@ -39,4 +39,7 @@ class PointToApprove(models.Model):
     target_point = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+class Unlocked_Scene(models.Model):
+    scene_name = models.CharField(max_length = 200, null = True)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
 
