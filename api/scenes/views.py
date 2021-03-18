@@ -77,9 +77,13 @@ class SceneViewSet(viewsets.ModelViewSet):
                 for scene_name in scene_names:
                     percentage_scene = Percentage(user = user, scene_name = scene_name)
                     percentage_scene.save()
-                    unlock_scene_data = Unlocked_Scene.objects.get(user = user.id)
-                    unlock_scene_data.scene_name = scene_name
-                    unlock_scene_data.save()
+                    try:
+                        unlock_scene_data = Unlocked_Scene.objects.get(user = user.id)
+                        unlock_scene_data.scene_name = scene_name
+                        unlock_scene_data.save()
+                    except:
+                        unlock_scene = Unlocked_Scene(user = user, scene_name = scene_name)
+                        unlock_scene.save()
                 return Response(serializer.data)
         if user.sub_plan == "Silver":
             expire_date = user.sub_date + relativedelta(months=3)
@@ -87,7 +91,7 @@ class SceneViewSet(viewsets.ModelViewSet):
                 return Response("Payment expire")
             else :
                 queried_percentage = Percentage.objects.all()
-                queried_percentage_scene_names = [s.scene_name for s in queried_percentage] 
+                queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
                 queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:2]
                 serializer = SceneSerializer(queried_scenes,many=True)
                 scene_names = [data.scene_name for data in queried_scenes]
