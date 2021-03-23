@@ -9,30 +9,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 #for production
-# SECRET_KEY = "my secret key"
-# DEBUG = int(os.environ.get("DEBUG", default=0))
-# ALLOWED_HOSTS = ["localhost","127.0.0.1","192.168.7.94"]
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "vr_vocabulary",
-#         "USER": "l_o_r",
-#         "PASSWORD": "lor11022020!",
-#         "HOST": "db",
-#         "PORT": "5432",
-#     }
-# }
-
-# for dev
-SECRET_KEY = "safsdfsdfadfad"
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = "my secret key"
+DEBUG = int(os.environ.get("DEBUG", default=0))
+ALLOWED_HOSTS = ["localhost","127.0.0.1","192.168.7.94"]
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "vr_vocabulary",
+        "USER": "l_o_r",
+        "PASSWORD": "lor11022020!",
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
+
+# for dev
+# SECRET_KEY = "safsdfsdfadfad"
+# DEBUG = True
+# ALLOWED_HOSTS = []
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 #Test Postgres
 # SECRET_KEY = "safsdfsdfadfad"
