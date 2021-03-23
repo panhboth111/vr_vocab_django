@@ -45,6 +45,7 @@ class SceneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
+
     @action(detail=False, methods=['get'])
     def unlock_scene(self, request):
         user = request.user
