@@ -45,18 +45,6 @@ class SceneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'])
-    def update_plan(self,request):
-        user = request.user
-        sub_plan = request.data['sub_plan']
-        sub_date = request.data['sub_date']
-
-        userdatas = User.objects.get(id=user.id)
-        userdatas.sub_plan = sub_plan
-        userdatas.sub_date = sub_date
-        userdatas.save()
-        return Response(userdatas.sub_date)
-
     @action(detail=False, methods=['get'])
     def unlock_scene(self, request):
         user = request.user
