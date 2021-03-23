@@ -10,6 +10,7 @@ from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLev
 from .models import ForgotPassword, CustomUser, Card
 from rest_framework.generics import UpdateAPIView
 from .mixins import GetSerializerClassMixin
+from datetime import datetime
 
 import stripe
 
@@ -174,5 +175,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
         user = request.user
         queried_user = User.objects.get(id=user.id)
         queried_user.sub_plan = request.data["sub_plan"]
+        queried_user.sub_date = datetime.now()
         queried_user.save()
         return Response("Well Done")
