@@ -11,12 +11,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #for production
 SECRET_KEY = "my secret key"
 DEBUG = int(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = ["localhost","127.0.0.1","192.168.7.94"]
+ALLOWED_HOSTS=['*']
+CORS_ORIGIN_ALLOW_ALL = True
 DATABASES = {
-    "default": {
+    "default": {  "USER": "l_o_r",
+      
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "vr_vocabulary",
-        "USER": "l_o_r",
         "PASSWORD": "lor11022020!",
         "HOST": "db",
         "PORT": "5432",
@@ -26,7 +27,9 @@ DATABASES = {
 # for dev
 # SECRET_KEY = "safsdfsdfadfad"
 # DEBUG = True
-# ALLOWED_HOSTS = []
+# ALLOWED_HOSTS=['*']
+
+# CORS_ORIGIN_ALLOW_ALL = True
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -61,6 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_framework_swagger',
     'accounts',
@@ -68,6 +72,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -141,7 +146,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'lenofreality@kit.edu.kh'
-EMAIL_HOST_PASSWORD = '*****'
+EMAIL_HOST_PASSWORD = 'lenofreality'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
