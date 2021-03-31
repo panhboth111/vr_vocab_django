@@ -24,7 +24,7 @@ DATABASES = {
     }
 }
 
-# for dev
+#for dev
 # SECRET_KEY = "safsdfsdfadfad"
 # DEBUG = True
 # ALLOWED_HOSTS=['*']

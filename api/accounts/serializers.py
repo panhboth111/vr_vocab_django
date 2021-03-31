@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField()
     class Meta:
         model = User
-        fields = ('id','username', 'password', 'email','coin','score','is_active', 'sub_plan', 'level')
+        fields = ('id','username', 'password', 'email','is_active', 'sub_plan', 'level')
 
     def validate(self, attrs):
         if not attrs['is_active']:
