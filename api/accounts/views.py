@@ -6,8 +6,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, action
-from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer ,TopScoreSerializer, CardSerializer, UpdateUserPlanSerializer
-from .models import ForgotPassword, CustomUser, Card
+from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer ,TopScoreSerializer, UpdateUserPlanSerializer
+from .models import ForgotPassword, CustomUser
 from rest_framework.generics import UpdateAPIView
 from .mixins import GetSerializerClassMixin
 from datetime import datetime
@@ -132,49 +132,15 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = CardSerializer
+    serializer_class = UpdateUserPlanSerializer
     http_method_names = ['post','get']
-    @action(detail=	False, methods=['post'])
+    @action(detail=	False, methods=['post'], permission_classes=[IsAuthenticated])
 
-    def default_plan(self, request):
-        serializer = UpdateUserPlanSerializer
-        user = request.user
-        queried_user = User.objects.get(id=user.id)
-        queried_user.sub_plan = request.data["sub_plan"]
-        queried_user.save()
-        return Response(queried_user.sub_plan)
-
-    @action(detail=	False, methods=['post'])
-    def charge(self, request):
-        serializer = CardSerializer(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            return Response("Please Input Your Credit Card...")
-        
-        try:
-            stripeToken = stripe.Token.create(
-                card={
-                    "number": int(serializer.data.get('card_num')),
-                    "exp_month": int(serializer.data.get('exp_month')),
-                    "exp_year": int(serializer.data.get('exp_year')),
-                    "cvc": int(serializer.data.get('cvc')),
-                },)
-            customer = stripe.Customer.create(
-            source = stripeToken.id
-            )
-            charge = stripe.Charge.create(
-                customer = customer,
-                amount = int(serializer.data.get('amount')),
-                currency = "usd",
-                description="Stripe Charges for service"
-            )
-        except: 
-            return Response("Wrong Credit Card Input..!")
+    def update_plan(self, request):
         serializer = UpdateUserPlanSerializer
         user = request.user
         queried_user = User.objects.get(id=user.id)
         queried_user.sub_plan = request.data["sub_plan"]
         queried_user.sub_date = datetime.now()
         queried_user.save()
-        return Response("Well Done")
+        return Response('sub_plan : ' + queried_user.sub_plan, +'date : '+  queried_user.sub_date)

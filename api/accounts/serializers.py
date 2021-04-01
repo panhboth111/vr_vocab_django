@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
-from .models import ForgotPassword, Card
+from .models import ForgotPassword
 import datetime
 
 
@@ -70,11 +70,6 @@ class TopScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id','username', 'score')
-
-class CardSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Card
-		fields = '__all__'
 
 class UpdateUserPlanSerializer(serializers.Serializer):
     model = User
