@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('email address', unique=True)
     username = models.CharField('username', max_length=100)
-    level = models.IntegerField(default=1)
+    level = models.IntegerField(default=0)
     sub_plan = models.CharField(default="Bronze", max_length = 20)
     sub_date = models.DateTimeField(default = timezone.now)
     last_request = models.DateTimeField(null=True, default=timezone.now().date()+relativedelta(days=-1))
