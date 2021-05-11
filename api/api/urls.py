@@ -4,7 +4,7 @@ from rest_framework import routers, permissions
 from rest_framework_swagger.views import get_swagger_view
 from rest_framework_simplejwt import views as jwt_views
 from accounts.views import UserViewSet, PaymentViewSet
-from scenes.views import SceneViewSet, WordViewSet, BookmarkViewSet, RecommendationViewSet, UnderstoodViewSet, PercentageViewSet, PointToApproveViewSet
+from scenes.views import SceneViewSet, WordViewSet, BookmarkViewSet, RecommendationViewSet, UnderstoodViewSet, PercentageViewSet, PointToApproveViewSet, CoinPaymentViewset
 
 
 router = routers.SimpleRouter()
@@ -17,6 +17,7 @@ router.register('understoods', UnderstoodViewSet)
 router.register('percentage',PercentageViewSet)
 router.register('points', PointToApproveViewSet)
 router.register('payment', PaymentViewSet, basename="payment")
+router.register('coins', CoinPaymentViewset)
 
 
 schema_view = get_swagger_view(title="VR Vocabulary API Documentation")

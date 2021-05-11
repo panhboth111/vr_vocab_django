@@ -13,8 +13,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     sub_plan = models.CharField(default="Bronze", max_length = 20)
     sub_date = models.DateTimeField(default = timezone.now)
     last_request = models.DateTimeField(null=True, default=timezone.now().date()+relativedelta(days=-1))
-    score = models.IntegerField(default=0)
-    coin = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)

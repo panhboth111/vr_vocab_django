@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer
+from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdateCoinSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -288,11 +288,40 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             queried_user = User.objects.get(id=user.id)
             queried_point = PointToApprove.objects.get(user = user.id)
             final_score = (queried_point.target_point * serializer.data.get("percentage"))/100
-            queried_user.score += final_score
-            queried_user.save()
-            queried_user.coin += serializer.data.get("coin")
-            queried_user.save()
-            queried_point.target_point = 0
-            queried_point.save()
-            return Response("Score and Coin updated successfully")
+            coin_payment = Coin_Payment.objects.filter(user = user)
+            if coin_payment.exists():
+                coin_payment = Coin_Payment.objects.get(user = user)
+                coin_payment.score += final_score
+                coin_payment.save()
+                coin_payment.coin += serializer.data.get("coin")
+                coin_payment.save()
+                queried_point.target_point = 0
+                queried_point.save()
+            else:
+                coin_payment = Coin_Payment(coin = serializer.data.get("coin"), score = final_score, user = user)
+                coin_payment.save()
+            serializer = CoinPaymentSerializer(coin_payment)
+            return Response(serializer.data)
+        return Response(serializer.errors)
+
+class CoinPaymentViewset(viewsets.ModelViewSet):
+    queryset = Coin_Payment.objects.all()
+    serializer_class = CoinPaymentSerializer
+    permission_classes = [IsAuthenticated]
+    def list(self, request):
+        user = request.user
+        coin = Coin_Payment.objects.filter(user = user)
+        serializer = CoinPaymentSerializer(coin, many = True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def update_coin(self, request):
+        user = request.user
+        serializer = UpdateCoinSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_user = User.objects.get(id = user.id)
+            queried_coin = Coin_Payment.objects.get(user = user.id)
+            queried_coin.coin -= serializer.data.get("pay_coin")
+            queried_coin.save()
+            return Response("coin and score updated successfully")
         return Response(serializer.errors)

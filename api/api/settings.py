@@ -9,20 +9,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 #for production
-SECRET_KEY = "my secret key"
-DEBUG = int(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS=['*']
-CORS_ORIGIN_ALLOW_ALL = True
-DATABASES = {
-    "default": {  "USER": "l_o_r",
+# SECRET_KEY = "my secret key"
+# DEBUG = int(os.environ.get("DEBUG", default=0))
+# ALLOWED_HOSTS=['*']
+# CORS_ORIGIN_ALLOW_ALL = True
+# DATABASES = {
+#     "default": {  "USER": "l_o_r",
       
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "vr_vocabulary",
-        "PASSWORD": "lor11022020!",
-        "HOST": "db",
-        "PORT": "5432",
-    }
-}
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "vr_vocabulary",
+#         "PASSWORD": "lor11022020!",
+#         "HOST": "db",
+#         "PORT": "5432",
+#     }
+# }
 
 #for dev
 # SECRET_KEY = "safsdfsdfadfad"
@@ -38,19 +38,19 @@ DATABASES = {
 # }
 
 #Test Postgres
-# SECRET_KEY = "safsdfsdfadfad"
-# DEBUG = True
-# ALLOWED_HOSTS = []
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'vr_vocabulary',
-#         'USER': 'postgres',
-#         'PASSWORD': 'admin',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+SECRET_KEY = "safsdfsdfadfad"
+DEBUG = True
+ALLOWED_HOSTS = []
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'vr_vocabulary_2',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 
 
 

@@ -43,3 +43,7 @@ class Unlocked_Scene(models.Model):
     scene_name = models.CharField(max_length = 200, null = True)
     user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
 
+class Coin_Payment(models.Model):
+    coin = models.IntegerField(default = 0)
+    score = models.IntegerField(default = 0)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
