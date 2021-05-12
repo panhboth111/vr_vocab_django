@@ -66,11 +66,6 @@ class UpdateUserLevelSerializer(serializers.Serializer):
     model = User
     level = serializers.IntegerField(required=True)
 
-class TopScoreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id','username', 'score')
-
 class UpdateUserPlanSerializer(serializers.Serializer):
     model = User
     sub_plan = serializers.CharField(required=True)

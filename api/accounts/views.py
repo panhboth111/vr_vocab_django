@@ -6,8 +6,10 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, action
-from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer ,TopScoreSerializer, UpdateUserPlanSerializer
+from .serializers import UserSerializer, ChangePasswordSerializer, UpdateUserLevelSerializer, UpdateUserScoreSerializer, TemporaryForgotPasswordSerializer, ConfirmedCodeSerializer, ForgotPasswordSerializer, SendEmailSerializer , UpdateUserPlanSerializer
 from .models import ForgotPassword, CustomUser
+from scenes.serializers import TopScoreSerializer
+from scenes.models import Coin_Payment
 from rest_framework.generics import UpdateAPIView
 from .mixins import GetSerializerClassMixin
 from datetime import datetime
@@ -112,9 +114,9 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     def update_score(self,request):
         serializer = UpdateUserScoreSerializer
         user = request.user
-        queried_user = User.objects.get(email=user.email)
-        queried_user.score = queried_user.score + request.data["score"]
-        queried_user.save()
+        queried_score = Coin_Payment.objects.get(user=user.id)
+        queried_score.score = queried_score.score + request.data["score"]
+        queried_score.save()
         return Response("user score updated successfully")
     @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
     def update_level(self,request):
@@ -126,7 +128,7 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response("user level updated successfully")
     @action(detail=False, methods=['get'],permission_classes=[IsAuthenticated])
     def top_score(self,request):
-        userscore = User.objects.all().order_by('-score')[:10]
+        userscore = Coin_Payment.objects.all().order_by('-score')[:10]
         serializer = TopScoreSerializer(userscore,many=True)
         return Response(serializer.data)
             
