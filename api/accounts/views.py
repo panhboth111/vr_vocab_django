@@ -136,13 +136,15 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UpdateUserPlanSerializer
     http_method_names = ['post','get']
-    @action(detail=	False, methods=['post'], permission_classes=[IsAuthenticated])
 
+    @action(detail=	False, methods=['post'], permission_classes=[IsAuthenticated])
     def update_plan(self, request):
-        serializer = UpdateUserPlanSerializer
         user = request.user
-        queried_user = User.objects.get(id=user.id)
-        queried_user.sub_plan = request.data["sub_plan"]
-        queried_user.sub_date = datetime.now()
-        queried_user.save()
-        return Response('sub_plan : ' + queried_user.sub_plan, +'date : '+  queried_user.sub_date)
+        serializer = UpdateUserPlanSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_user = User.objects.get(id=user.id)
+            queried_user.sub_plan = serializer.data.get("sub_plan")
+            queried_user.sub_date = datetime.now()
+            queried_user.save()
+            return Response({"sub_plan": queried_user.sub_plan, "sub_date": queried_user.sub_date})
+        return Response(serializer.errors)
