@@ -63,8 +63,11 @@ class CoinPaymentSerializer(serializers.ModelSerializer):
         fields = "__all__"
         model = Coin_Payment
 
-class UpdateCoinSerializer(serializers.Serializer):
+class UpdatePayCoinSerializer(serializers.Serializer):
     pay_coin = serializers.IntegerField(required=True)
+
+class UpdateBuyCoinSerializer(serializers.Serializer):
+    buy_coin = serializers.IntegerField(required=True)
 
 class TopScoreSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source = "user.username", read_only = True)

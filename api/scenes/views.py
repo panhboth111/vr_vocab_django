@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdateCoinSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -315,13 +315,23 @@ class CoinPaymentViewset(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
-    def update_coin(self, request):
+    def pay_coin(self, request):
         user = request.user
-        serializer = UpdateCoinSerializer(data = request.data)
+        serializer = UpdatePayCoinSerializer(data = request.data)
         if serializer.is_valid():
             queried_user = User.objects.get(id = user.id)
             queried_coin = Coin_Payment.objects.get(user = user.id)
             queried_coin.coin -= serializer.data.get("pay_coin")
             queried_coin.save()
-            return Response("coin and score updated successfully")
+            return Response("coin updated successfully")
+        return Response(serializer.errors)
+    @action(detail=False, methods=['post'])
+    def buy_coin(self, request):
+        user = request.user
+        serializer = UpdateBuyCoinSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_coin = Coin_Payment.objects.get(user = user.id)
+            queried_coin.coin += serializer.data.get('buy_coin')
+            queried_coin.save()
+            return Response("Update buy coin successfully")
         return Response(serializer.errors)
