@@ -179,6 +179,9 @@ class RecommendationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
     def list(self, request):
+        """
+            query recommendation scene from scene table base on level
+        """
         user = request.user
         recommendation = Scene.objects.all().filter(level=user.level)
         serializer = SceneSerializer(recommendation, many=True)
@@ -312,7 +315,7 @@ class CoinPaymentViewset(viewsets.ModelViewSet):
         user = request.user
         coin = Coin_Payment.objects.filter(user = user)
         serializer = CoinPaymentSerializer(coin, many = True)
-        return Response(serializer.data)
+        return Response(serializer.data[0])
 
     @action(detail=False, methods=['post'])
     def pay_coin(self, request):
