@@ -207,50 +207,60 @@ class UnderstoodViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         serializer = UnderstoodSerializer(understood, many = True)
         return Response(serializer.data)
     def create(self, request):
+        """
+            create & update <word> to understood table, 
+        """
         user = request.user
         serializer = AddUnderstoodSerializer(data = request.data)
         if serializer.is_valid():
             understood = Understood(word=serializer.data.get("word"),user=user)
             understood.save()
-            point = PointToApprove.objects.filter(user = user)
+            point = PointToApprove.objects.filter(user = user, scene_id = serializer.data.get("scene_id"))
             if point.exists():
-                point = PointToApprove.objects.get(user = user)
+                point = PointToApprove.objects.get(user = user, scene_id = serializer.data.get("scene_id"))
                 point.target_point += serializer.data.get("target_point")
                 point.save()
             else:
-                create_point_to_approve = PointToApprove(target_point = serializer.data.get("target_point"), user=user)
+                create_point_to_approve = PointToApprove(target_point = serializer.data.get("target_point"), user = user, scene_id = serializer.data.get("scene_id"))
                 create_point_to_approve.save()
             serializer = UnderstoodSerializer(understood)
             return Response(serializer.data)
         return Response(serializer.errors)
 class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     """
-    create:
-    (token)create percentage for a user
-    list:
-    (token)get all percentage in all scenes for a user
-    update_percentage:
-    (token)update percentage in a specific scene for a user
-    update_complete:
-    (token)update complete in a specific scene for a user
+        create:
+        (token)create percentage for a user
+        list:
+        (token)get all percentage in all scenes for a user
+        update_percentage:
+        (token)update percentage in a specific scene for a user
+        update_complete:
+        (token)update complete in a specific scene for a user
     """
     queryset = Percentage.objects.all()
     serializer_class = PercentageSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get','post']
     serializer_action_classes = {
+        'create': PercentageSerializer,
         'update_percentage':PercentageUpdatePercentageSerializer,
         'update_complete':PercentageUpdateCompleteSerializer
     }
     def create(self,request):
+        """
+            this endpoint will create the new record of current user if scene_name doesn't exist
+        """
         user = request.user
-        queried_percentage = Percentage.objects.all().filter(user=user.id,scene_name=request.data["scene_name"])
-        if len(queried_percentage) > 0:
-            return Response("The percentage for this user in this scene has already been created")
-        new_percentage = Percentage(scene_name=request.data["scene_name"],user=user,percentage=request.data["percentage"], total_vocab=request.data["total_vocab"], complete=request.data["complete"])
-        new_percentage.save()
-        serializer = self.get_serializer(new_percentage)
-        return Response(serializer.data)
+        serializer = PercentageSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_percentage = Percentage.objects.filter(user=user.id,scene_name=serializer.data.get("scene_name"))
+            if queried_percentage.exists():
+                return Response("The percentage for this user in this scene has already been created")
+            new_percentage = Percentage(scene_name=serializer.data.get("scene_name"),user=user,percentage=serializer.data.get("percentage"), total_vocab=serializer.data.get("total_vocab"), complete=serializer.data.get("complete"))
+            new_percentage.save()
+            serializer = self.get_serializer(new_percentage)
+            return Response(serializer.data)
+        return Response(serializer.errors)
     def list(self,request):
         user = request.user
         percentage = Percentage.objects.all().filter(user=user.id)
@@ -258,18 +268,30 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response(serializer.data)
     @action(detail=False, methods=['post'])
     def update_percentage(self,request):
+        """
+            update new percentage to percentage table
+        """
         user = request.user
-        percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
-        percentage.percentage = request.data["percentage"]
-        percentage.save()
-        return Response("percentage updated successfully")
+        serializer = PercentageUpdatePercentageSerializer(data = request.data)
+        if serializer.is_valid():
+            percentage = Percentage.objects.get(user=user.id,scene_name=serializer.data.get("scene_name"))
+            percentage.percentage = serializer.data.get("percentage")
+            percentage.save()
+            return Response("percentage updated successfully")
+        return Response(serializer.errors)
     @action(detail=False, methods=['post'])
     def update_complete(self,request):
+        """
+            update complete to percentage table
+        """
         user = request.user
-        percentage = Percentage.objects.get(user=user.id,scene_name=request.data["scene_name"])
-        percentage.complete = request.data["complete"]
-        percentage.save()
-        return Response("complete updated successfully")
+        serializer = PercentageUpdateCompleteSerializer(data = request.data)
+        if serializer.is_valid():
+            percentage = Percentage.objects.get(user=user.id,scene_name=serializer.data.get("scene_name"))
+            percentage.complete = serializer.data.get("complete")
+            percentage.save()
+            return Response("complete updated successfully")
+        return Response(serializer.errors)
 
 class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
@@ -285,11 +307,14 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         return Response(serializer.data)
     @action(detail=False, methods=['post'])
     def update_score(self, request):
+        """
+            Update coin & score that calculate with target_point to coin_payment table
+        """
         user = request.user
         serializer = UpdateUserScoreSerializer(data = request.data)
         if serializer.is_valid():
-            queried_user = User.objects.get(id=user.id)
-            queried_point = PointToApprove.objects.get(user = user.id)
+            queried_user = User.objects.get(id = user.id)
+            queried_point = PointToApprove.objects.get(user = user.id, scene_id = serializer.data.get("scene_id"))
             final_score = (queried_point.target_point * serializer.data.get("percentage"))/100
             coin_payment = Coin_Payment.objects.filter(user = user)
             if coin_payment.exists():
@@ -298,6 +323,7 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
                 coin_payment.save()
                 coin_payment.coin += serializer.data.get("coin")
                 coin_payment.save()
+
                 queried_point.target_point = 0
                 queried_point.save()
             else:
@@ -307,10 +333,14 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response(serializer.errors)
 
-class CoinPaymentViewset(viewsets.ModelViewSet):
+class CoinPaymentViewset(GetSerializerClassMixin,viewsets.ModelViewSet):
     queryset = Coin_Payment.objects.all()
     serializer_class = CoinPaymentSerializer
     permission_classes = [IsAuthenticated]
+    serializer_action_classes = {
+        'pay_coin': UpdatePayCoinSerializer,
+        'buy_coin': UpdateBuyCoinSerializer
+    }
     def list(self, request):
         user = request.user
         coin = Coin_Payment.objects.filter(user = user)
@@ -319,22 +349,39 @@ class CoinPaymentViewset(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def pay_coin(self, request):
+        """
+            use when user pay coin on scenes or other
+        """
         user = request.user
         serializer = UpdatePayCoinSerializer(data = request.data)
         if serializer.is_valid():
             queried_user = User.objects.get(id = user.id)
-            queried_coin = Coin_Payment.objects.get(user = user.id)
-            queried_coin.coin -= serializer.data.get("pay_coin")
-            queried_coin.save()
-            return Response("coin updated successfully")
+            coin_payment = Coin_Payment.objects.filter(user = user.id)
+            if coin_payment.exists():
+                queried_coin = Coin_Payment.objects.get(user = user.id)
+                if serializer.data.get("pay_coin") > queried_coin.coin:
+                    return Response("You don't have enough coin!")
+                queried_coin.coin -= serializer.data.get("pay_coin")
+                queried_coin.save()
+                return Response("You paid: " + str(serializer.data.get("pay_coin")) + " coins")
+            else: return Response("You don't have any coin yet! Purchase some?")
         return Response(serializer.errors)
     @action(detail=False, methods=['post'])
     def buy_coin(self, request):
+        """
+            use when user purchase coin
+        """
         user = request.user
         serializer = UpdateBuyCoinSerializer(data = request.data)
         if serializer.is_valid():
-            queried_coin = Coin_Payment.objects.get(user = user.id)
-            queried_coin.coin += serializer.data.get('buy_coin')
-            queried_coin.save()
-            return Response("Update buy coin successfully")
+            coin_payment = Coin_Payment.objects.filter(user = user)
+            if coin_payment.exists():
+                queried_coin = Coin_Payment.objects.get(user = user.id)
+                queried_coin.coin += serializer.data.get('buy_coin')
+                queried_coin.save()
+                return Response("Update buy coin successfully")
+            else:
+                coin_payment = Coin_Payment(coin = serializer.data.get("buy_coin"), score = 0, user = user)
+                coin_payment.save()
+                return Response("Purchased coin successfully")
         return Response(serializer.errors)

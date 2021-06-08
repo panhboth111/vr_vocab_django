@@ -46,6 +46,9 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'],url_path="info",permission_classes=[IsAuthenticated])
     def get_user_info(self,request):
+        """
+            return user record
+        """
         user = request.user
         serializer = self.get_serializer(user)
         return Response({'user':serializer.data})
@@ -68,6 +71,9 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def send_email(self, request):
+        """
+            send verify email to user
+        """
         serializer = SendEmailSerializer(data = request.data)
         if serializer.is_valid():
             verify = get_random_string(length=6, allowed_chars='1234567890')
@@ -110,24 +116,29 @@ class UserViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             return Response("Verification code didn't confirm yet!")
         return Response(serializer.errors)
 
-    @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
-    def update_score(self,request):
-        serializer = UpdateUserScoreSerializer
-        user = request.user
-        queried_score = Coin_Payment.objects.get(user=user.id)
-        queried_score.score = queried_score.score + request.data["score"]
-        queried_score.save()
-        return Response("user score updated successfully")
+    # @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
+    # def update_score(self,request):
+    #     serializer = UpdateUserScoreSerializer
+    #     user = request.user
+    #     queried_score = Coin_Payment.objects.get(user=user.id)
+    #     queried_score.score = queried_score.score + request.data["score"]
+    #     queried_score.save()
+    #     return Response("user score updated successfully")
     @action(detail=False, methods=['post'],permission_classes=[IsAuthenticated])
     def update_level(self,request):
-        serializer = UpdateUserLevelSerializer
+        serializer = UpdateUserLevelSerializer(data = request.data)
         user = request.user
-        queried_user = User.objects.get(email=user.email)
-        queried_user.level = request.data["level"]
-        queried_user.save()
-        return Response("user level updated successfully")
+        if serializer.is_valid():
+            queried_user = User.objects.get(email=user.email)
+            queried_user.level = serializer.data.get("level")
+            queried_user.save()
+            return Response("user level updated successfully")
+        return Response(serializer.errors)
     @action(detail=False, methods=['get'],permission_classes=[IsAuthenticated])
     def top_score(self,request):
+        """
+            return 10 top score users
+        """
         userscore = Coin_Payment.objects.all().order_by('-score')[:10]
         serializer = TopScoreSerializer(userscore,many=True)
         return Response(serializer.data)
