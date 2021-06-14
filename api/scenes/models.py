@@ -29,11 +29,15 @@ class Understood(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
 
 class Percentage(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
     scene_name = models.CharField( max_length = 200, null = True )
     percentage = models.CharField( max_length = 200, null = True )
     total_vocab = models.CharField( max_length = 200, null = True )
     complete = models.CharField( max_length = 200, null = True )
+
+class Purchased_Scene(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
+    scene_id = models.IntegerField(default = 0)
 
 class PointToApprove(models.Model):
     target_point = models.IntegerField(default = 0)

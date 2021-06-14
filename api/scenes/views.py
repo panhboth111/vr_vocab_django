@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer
+from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment, Purchased_Scene
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer, UpdatePurchasedSceneSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -16,7 +16,7 @@ from dateutil.relativedelta import relativedelta
 # Create your views here.
 
 User = get_user_model()
-class SceneViewSet(viewsets.ModelViewSet):
+class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     """
     list:
     get all the scenes
@@ -25,6 +25,9 @@ class SceneViewSet(viewsets.ModelViewSet):
     """
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
+    serializer_action_classes = {
+        'update_purchased_scene': UpdatePurchasedSceneSerializer
+    }
     http_method_names = ['get','post']
     lookup_field = "level"
     def get_queryset(self):
@@ -45,18 +48,43 @@ class SceneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(scenes,many=True)
         return Response(serializer.data)
 
+    @action(detail = False, methods = ['post'], url_path = 'purchased_scene')
+    def update_purchased_scene(self, request):
+        """
+            update scene_id that already buy
+        """
+        user = request.user
+        serializer = UpdatePurchasedSceneSerializer(data = request.data)
+        if serializer.is_valid():
+            purchased_scene = Purchased_Scene(scene_id = serializer.data.get("scene_id"), user = user)
+            purchased_scene.save()
+            coin_payment = Coin_Payment.objects.filter(user = user)
+            if coin_payment.exists():
+                queried_coin = Coin_Payment.objects.get(user = user.id)
+                if queried_coin.coin >= 5:
+                    queried_coin.coin -= 5
+                    queried_coin.save()
+                else: return Response("You don't have enough coin!")
+            else: 
+                return Response("You don't have any coin yet! Purchase some?")
+            return Response("Scene updated successfully!")
+        return Response(serializer.errors)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes = [IsAuthenticated])
     def unlock_scene(self, request):
         user = request.user
         userdatas = User.objects.get(id=user.id)
         if user.sub_plan == "Bronze":
             queried_percentage = Percentage.objects.all()
+            queried_purchased_scene = Purchased_Scene.objects.all()
             queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
-            queried_scenes = Scene.objects.all().filter(~Q(scene_name__in=queried_percentage_scene_names),level=user.level)[:1]
-            serializer = SceneSerializer(queried_scenes,many=True)
+            queried_purchased_scene_names = [s.scene_id for s in queried_purchased_scene]
+            queried_scenes = Scene.objects.all().filter(~Q(scene_name__in = queried_percentage_scene_names), ~Q(id__in = queried_purchased_scene_names), level=user.level)[:1]
+            serializer = SceneSerializer(queried_scenes, many=True)
             scene_names = [data.scene_name for data in queried_scenes]
             if(datetime.now().date() == user.last_request.date()):
+                # userdatas.last_request = userdatas.sub_date
+                # userdatas.save()
                 queried_unlock_scene = Unlocked_Scene.objects.all().filter(user = user.id)
                 serializer = UnlockedSceneSerializer(queried_unlock_scene, many = True)
                 return Response(serializer.data)

@@ -61,6 +61,9 @@ class UpdateUserScoreSerializer(serializers.Serializer):
     coin = serializers.IntegerField(required = True)
     scene_id = serializers.IntegerField(required = True)
 
+class UpdatePurchasedSceneSerializer(serializers.Serializer):
+    scene_id = serializers.IntegerField(required = True)
+
 class UnlockedSceneSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
