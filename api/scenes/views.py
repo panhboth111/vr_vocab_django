@@ -71,7 +71,7 @@ class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         return Response(serializer.errors)
 
     @action(detail = False, methods=['get'], permission_classes = [IsAuthenticated])
-    def purchased_scene(self, request):
+    def get_purchased_scene(self, request):
         """
             Query record from purchased_scene table by user
         """
