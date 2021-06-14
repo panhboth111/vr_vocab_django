@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Scene,Word,Bookmark, Understood, Percentage, PointToApprove , Unlocked_Scene, Coin_Payment
+from .models import Scene,Word,Bookmark, Understood, Percentage, PointToApprove , Unlocked_Scene, Coin_Payment, Purchased_Scene
 class SceneSerializer(serializers.ModelSerializer):
     words = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
@@ -63,6 +63,11 @@ class UpdateUserScoreSerializer(serializers.Serializer):
 
 class UpdatePurchasedSceneSerializer(serializers.Serializer):
     scene_id = serializers.IntegerField(required = True)
+
+class PurchasedSceneSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Purchased_Scene
 
 class UnlockedSceneSerializer(serializers.ModelSerializer):
     class Meta:

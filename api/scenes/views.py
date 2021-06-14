@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment, Purchased_Scene
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer, UpdatePurchasedSceneSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer, UpdatePurchasedSceneSerializer, PurchasedSceneSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -69,6 +69,16 @@ class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
                 return Response("You don't have any coin yet! Purchase some?")
             return Response("Scene updated successfully!")
         return Response(serializer.errors)
+
+    @action(detail = False, methods=['get'], permission_classes = [IsAuthenticated])
+    def purchased_scene(self, request):
+        """
+            Query record from purchased_scene table by user
+        """
+        user = request.user
+        scene = Purchased_Scene.objects.filter(user = user)
+        serializer = PurchasedSceneSerializer(scene, many = True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes = [IsAuthenticated])
     def unlock_scene(self, request):
