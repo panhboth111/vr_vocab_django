@@ -382,8 +382,10 @@ class CoinPaymentViewset(GetSerializerClassMixin,viewsets.ModelViewSet):
     def list(self, request):
         user = request.user
         coin = Coin_Payment.objects.filter(user = user)
-        serializer = CoinPaymentSerializer(coin, many = True)
-        return Response(serializer.data[0])
+        if coin.exists():
+            serializer = CoinPaymentSerializer(coin, many = True)
+            return Response(serializer.data[0])
+        return Response([])
 
     @action(detail=False, methods=['post'])
     def pay_coin(self, request):
