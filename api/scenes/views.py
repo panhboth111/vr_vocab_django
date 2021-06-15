@@ -56,14 +56,14 @@ class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         user = request.user
         serializer = UpdatePurchasedSceneSerializer(data = request.data)
         if serializer.is_valid():
-            purchased_scene = Purchased_Scene(scene_id = serializer.data.get("scene_id"), user = user)
-            purchased_scene.save()
             coin_payment = Coin_Payment.objects.filter(user = user)
             if coin_payment.exists():
                 queried_coin = Coin_Payment.objects.get(user = user.id)
                 if queried_coin.coin >= 5:
                     queried_coin.coin -= 5
                     queried_coin.save()
+                    purchased_scene = Purchased_Scene(scene_id = serializer.data.get("scene_id"), user = user)
+                    purchased_scene.save()
                 else: return Response("You don't have enough coin!")
             else: 
                 return Response("You don't have any coin yet! Purchase some?")

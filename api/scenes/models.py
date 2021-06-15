@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class Scene (models.Model):
+class Scene (models.Model): 
     scene_name = models.CharField( max_length = 200)
     scene_image = models.CharField( max_length = 200)
     level = models.IntegerField()
@@ -31,9 +31,9 @@ class Understood(models.Model):
 class Percentage(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
     scene_name = models.CharField( max_length = 200, null = True )
-    percentage = models.CharField( max_length = 200, null = True )
-    total_vocab = models.CharField( max_length = 200, null = True )
-    complete = models.CharField( max_length = 200, null = True )
+    percentage = models.IntegerField( default = 0 )
+    total_vocab = models.IntegerField( default = 0 )
+    complete = models.IntegerField( default = 0 )
 
 class Purchased_Scene(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
