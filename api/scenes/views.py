@@ -86,7 +86,7 @@ class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
         user = request.user
         userdatas = User.objects.get(id=user.id)
         if user.sub_plan == "Bronze":
-            if(datetime.now().date() == user.last_request.date()):
+            if(timezone.now().date() == user.last_request.date()):
             # if(datetime.now().minute <= user.last_request.minute + 1):
                 # userdatas.last_request = timezone.now() + relativedelta(days = -1)
                 # userdatas.save()
@@ -94,25 +94,28 @@ class SceneViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
                 serializer = UnlockedSceneSerializer(queried_unlock_scene, many = True)
                 return Response(serializer.data)
             else:
+                userdatas.last_request = timezone.now()
+                userdatas.save()
+
                 queried_percentage = Percentage.objects.all()
                 queried_purchased_scene = Purchased_Scene.objects.all()
                 queried_percentage_scene_names = [s.scene_name for s in queried_percentage]
                 queried_purchased_scene_names = [s.scene_id for s in queried_purchased_scene]
                 queried_scenes = Scene.objects.all().filter(~Q(scene_name__in = queried_percentage_scene_names), ~Q(id__in = queried_purchased_scene_names), level=user.level)[:1]
-                serializer = SceneSerializer(queried_scenes, many=True)
                 scene_names = [data.scene_name for data in queried_scenes]
                 for scene_name in scene_names:
                     percentage_scene = Percentage(user = user, scene_name = scene_name)
                     percentage_scene.save()
-                    try:
-                        unlock_scene_data = Unlocked_Scene.objects.get(user = user.id)
-                        unlock_scene_data.scene_name = scene_name
-                        unlock_scene_data.save()
-                    except:
+                    unlock_scene_data = Unlocked_Scene.objects.filter(user = user)
+                    if unlock_scene_data.exists():
+                        unlock_scene = Unlocked_Scene.objects.get(user = user.id)
+                        unlock_scene.scene_name = scene_name
+                        unlock_scene.save()
+                    else:
                         unlock_scene = Unlocked_Scene(user = user, scene_name = scene_name)
                         unlock_scene.save()
-                    userdatas.last_request = timezone.now()
-                    userdatas.save()
+                queried_unlock_scene = Unlocked_Scene.objects.all().filter(user = user.id)
+                serializer = UnlockedSceneSerializer(queried_unlock_scene, many = True)
                 return Response(serializer.data)
         if user.sub_plan == "Silver":
             expire_date = user.sub_date + relativedelta(months=3)
