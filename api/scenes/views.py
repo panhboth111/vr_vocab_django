@@ -358,27 +358,47 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         """
             Update coin & score that calculate with target_point to coin_payment table
         """
+        # update score only one time per sence
         user = request.user
         serializer = UpdateUserScoreSerializer(data = request.data)
         if serializer.is_valid():
             queried_user = User.objects.get(id = user.id)
             queried_point = PointToApprove.objects.get(user = user.id, scene_id = serializer.data.get("scene_id"))
             final_score = (queried_point.target_point * serializer.data.get("percentage"))/100
-            coin_payment = Coin_Payment.objects.filter(user = user)
-            if coin_payment.exists():
-                coin_payment = Coin_Payment.objects.get(user = user)
-                coin_payment.score += final_score
-                coin_payment.save()
-                coin_payment.coin += serializer.data.get("coin")
-                coin_payment.save()
+            if queried_point.scored_scene == False:
+                coin_payment = Coin_Payment.objects.filter(user = user)
+                if coin_payment.exists():
+                    coin_payment = Coin_Payment.objects.get(user = user)
+                    coin_payment.score += final_score
+                    coin_payment.save()
+                    coin_payment.coin += serializer.data.get("coin")
+                    coin_payment.save()
 
-                queried_point.target_point = 0
+                    queried_point.target_point = 0
+                    queried_point.save()
+                else:
+                    coin_payment = Coin_Payment(coin = serializer.data.get("coin"), score = final_score, user = user)
+                    coin_payment.save()
+                queried_point.scored_scene = True
                 queried_point.save()
+                serializer = CoinPaymentSerializer(coin_payment)
+                return Response(serializer.data)
             else:
-                coin_payment = Coin_Payment(coin = serializer.data.get("coin"), score = final_score, user = user)
-                coin_payment.save()
-            serializer = CoinPaymentSerializer(coin_payment)
-            return Response(serializer.data)
+                coin_payment = Coin_Payment.objects.filter(user = user)
+                if coin_payment.exists():
+                    coin_payment = Coin_Payment.objects.get(user = user)
+                    coin_payment.score += 0
+                    coin_payment.save()
+                    coin_payment.coin += 0
+                    coin_payment.save()
+
+                    queried_point.target_point = 0
+                    queried_point.save()
+                else:
+                    coin_payment = Coin_Payment(coin = 0, score = 0, user = user)
+                    coin_payment.save()
+                serializer = CoinPaymentSerializer(coin_payment)
+                return Response(serializer.data)
         return Response(serializer.errors)
 
 class CoinPaymentViewset(GetSerializerClassMixin,viewsets.ModelViewSet):
