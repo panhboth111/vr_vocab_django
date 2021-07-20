@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Scene,Word,Bookmark,Understood, Percentage, PointToApprove, Unlocked_Scene, Coin_Payment, Purchased_Scene
-from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer, UpdatePurchasedSceneSerializer, PurchasedSceneSerializer
+from .serializers import SceneSerializer,WordSerializer,BookmarkSerializer, UnderstoodSerializer, PosRotSerializer, PercentageSerializer, PercentageUpdateCompleteSerializer, PercentageUpdatePercentageSerializer, PointToApproveSerializer, UpdateUserScoreSerializer, AddUnderstoodSerializer , UnlockedSceneSerializer, CoinPaymentSerializer, UpdatePayCoinSerializer, UpdateBuyCoinSerializer, UpdatePurchasedSceneSerializer, PurchasedSceneSerializer, VerifyQuizSerializer
 from .mixins import GetSerializerClassMixin
 from django.contrib.auth import get_user_model
 import random
@@ -341,7 +341,7 @@ class PercentageViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
             return Response("complete updated successfully")
         return Response(serializer.errors)
 
-class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
+class PointToApproveViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
     queryset = PointToApprove.objects.all()
     serializer_class = PointToApproveSerializer
     permission_classes = [IsAuthenticated]
@@ -353,7 +353,24 @@ class PointToApproveViewSet(GetSerializerClassMixin,viewsets.ModelViewSet):
         point = PointToApprove.objects.all()
         serializer = PointToApproveSerializer(point, many = True)
         return Response(serializer.data)
-    @action(detail=False, methods=['post'])
+
+    @action(detail = False, methods = ['post'])
+    def verify_quiz(self, request):
+        """ 
+            check wether user already have a quiz
+        """
+        user = request.user
+        serializer = VerifyQuizSerializer(data = request.data)
+        if serializer.is_valid():
+            queried_point = PointToApprove.objects.filter(user = user.id, scene_id = serializer.data.get("scene_id"))
+            if queried_point.exists():
+                queried_point = PointToApprove.objects.get(user = user.id, scene_id = serializer.data.get("scene_id"))
+                return Response(queried_point.scored_scene)
+            return Response('This user does not have this scene yet!')
+        return Response(serializer.errors)
+
+
+    @action(detail = False, methods = ['post'])
     def update_score(self, request):
         """
             Update coin & score that calculate with target_point to coin_payment table

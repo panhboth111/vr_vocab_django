@@ -56,6 +56,9 @@ class PointToApproveSerializer(serializers.ModelSerializer):
         fields = "__all__"
         model = PointToApprove
 
+class VerifyQuizSerializer(serializers.Serializer):
+    scene_id = serializers.IntegerField(required = True)
+
 class UpdateUserScoreSerializer(serializers.Serializer):
     percentage = serializers.IntegerField(required = True)
     coin = serializers.IntegerField(required = True)
