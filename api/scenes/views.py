@@ -366,7 +366,7 @@ class PointToApproveViewSet(GetSerializerClassMixin, viewsets.ModelViewSet):
             if queried_point.exists():
                 queried_point = PointToApprove.objects.get(user = user.id, scene_id = serializer.data.get("scene_id"))
                 return Response(queried_point.scored_scene)
-            return Response('This user does not have this scene yet!')
+            return Response(False)
         return Response(serializer.errors)
 
 
